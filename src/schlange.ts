@@ -136,8 +136,8 @@ export class Schlange implements UnoPlayerInterface.PlayerInterface {
   static readonly evalWildDraw4 = 1;
   static readonly evalWild = 2;
   static readonly evalOtherWild = 3;
-  static readonly evalAction = 4;
-  static readonly evalNumber = 5;
+  static readonly evalNumber = 4;
+  static readonly evalAction = 4 * 10 + 1;
 
   public submitCard(): UnoConsts.Card {
     assert(this.legalSubmissions.length > 0);
