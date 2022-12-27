@@ -26,4 +26,7 @@ export namespace UnoUtils {
     return false;
   }
 
+  export function countCardIn(card: UnoConsts.Card, cards: UnoConsts.Card[]) {
+    return cards.filter(c => UnoUtils.isSameCard(c, card)).length
+  }
 }

@@ -168,7 +168,9 @@ export namespace UnoConsts {
           turn_right:            boolean,
           number_card_play:      number,
           number_turn_play:      number,
-          number_card_of_player: number[]
+          number_card_of_player: {
+            [player_id: string]: number
+          }
         };
 
         export type PublicCard = {
@@ -181,7 +183,7 @@ export namespace UnoConsts {
           winner:  string,
           score: {
             [player_name: string]: number
-          }[]
+          }
         };
 
         export type FinishGame = {
@@ -189,10 +191,10 @@ export namespace UnoConsts {
           turn_win: number,
           order: {
             [player_name: string]: number
-          }[],
+          },
           total_score: {
             [player_name: string]: number
-          }[]
+          }
         };
       }
     }
@@ -240,10 +242,23 @@ export namespace UnoConsts {
     special?: Action
   };
 
+  export namespace Cards {
+    export const WildDraw4: Card = {
+      color: Color.Black,
+      special: Action.WildDraw4
+    };
+
+    export const WildShuffleHands: Card = {
+      color: Color.Black,
+      special: Action.WildShuffleHands
+    };
+  }
+
   export enum DrawReason {
     DrawTwo =   "draw_2",
     WildDraw4 = "wild_draw_4",
     Bind2 =     "bind_2",
     Nothing =   "nothing"
   }
+
 }
