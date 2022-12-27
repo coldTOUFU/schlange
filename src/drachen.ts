@@ -56,7 +56,10 @@ export class Drachen implements UnoPlayerInterface.PlayerInterface {
     this.myCards = this.myCards.concat(msg.cards_receive);
   }
 
-  public onReceivedFirstPlayer(msg: UnoConsts.Event.Message.Receive.FirstPlayer): void {;}
+  public onReceivedFirstPlayer(msg: UnoConsts.Event.Message.Receive.FirstPlayer): void {
+    this.playOrder = msg.play_order;
+    this.myIdxOnOrder = this.playOrder.indexOf(this.myPlayerId);
+  }
 
   public onReceivedColorOfWild(msg: UnoConsts.Event.Message.Receive.ColorOfWild): void {;}
 
@@ -157,9 +160,14 @@ export class Drachen implements UnoPlayerInterface.PlayerInterface {
     return this.bestHand;
   }
 
+  /* ラウンドないしゲームを通じて使うフィールド。 */
+  private myPlayerId: string = '';
+  private playOrder: string[] = [];
+  private myIdxOnOrder: number = -1;
+
+  /* 処理をまたぐときの情報保存用。 */
   private myCards: UnoConsts.Card[] = [];
   private legalSubmissions: UnoConsts.Card[] = [];
-  private myPlayerId: string = '';
   private canSubmitDrawnCard: boolean = false;
   private bestHand: UnoConsts.Card | null = null;
 
@@ -181,6 +189,10 @@ export class Drachen implements UnoPlayerInterface.PlayerInterface {
   private isWildDraw4Valid() {
     return this.legalSubmissions.length <=
         UnoUtils.countCardIn(UnoConsts.Cards.WildDraw4, this.myCards);
+  }
+
+  private hasCard(card: UnoConsts.Card) {
+    return UnoUtils.countCardIn(card, this.myCards) > 0;
   }
 
   static readonly evalMin = 0;
@@ -226,15 +238,95 @@ export class Drachen implements UnoPlayerInterface.PlayerInterface {
             UnoUtils.isSameCard(card, UnoConsts.Cards.WildShuffleHands)) {
           bestIdx = i;
           break;
-        } else if () {
-
         }
       } else {
+        const interferingCard = this.searchInterferingCard(msg);
+        if (interferingCard) {
+          return interferingCard;
+        }
 
+        if (this.isLikelyToWin(msg)) {
+          // TODO: 減点の大きい手から出す。
+        }
       }
 
     }
 
     return this.legalSubmissions[bestIdx];
+  }
+
+  /* 次プレイヤを妨害する手を選ぶ。 */
+  private searchInterferingCard(msg: UnoConsts.Event.Message.Receive.NextPlayer): UnoConsts.Card | null {
+    const nextPlayerID = msg.turn_right ?
+        this.playOrder[(this.myIdxOnOrder + 1) % 4] :
+        this.playOrder[(this.myIdxOnOrder - 1 + 4) % 4];
+    
+    /* 次プレイヤの手札が別に少なくないなら、妨害しても意味ない。 */
+    if (msg.number_card_of_player[nextPlayerID] > Drachen.FEW_HAND_THRESHOLD) { return null; }
+
+    /* 次の次のプレイヤの手札が少なくないなら、次のプレイヤを飛ばす系のカードを出す。 */
+    const nextOfNextPlayerID = msg.turn_right ?
+        this.playOrder[(this.myIdxOnOrder + 2) % 4] :
+        this.playOrder[(this.myIdxOnOrder - 2 + 4) % 4];
+    if (msg.number_card_of_player[nextOfNextPlayerID] > Drachen.FEW_HAND_THRESHOLD) {
+      if (this.hasCard(UnoConsts.Cards.WildDraw4) &&
+          this.isWildDraw4Valid()) {
+        return UnoConsts.Cards.WildDraw4;
+      }
+      if (this.hasCard(UnoConsts.Cards.WildCustomizable)) {
+        return UnoConsts.Cards.WildCustomizable;
+      }
+      if (this.hasCard(UnoConsts.Cards.RedDrawTwo)) {
+        return UnoConsts.Cards.RedDrawTwo;
+      }
+      if (this.hasCard(UnoConsts.Cards.YellowDrawTwo)) {
+        return UnoConsts.Cards.YellowDrawTwo;
+      }
+      if (this.hasCard(UnoConsts.Cards.GreenDrawTwo)) {
+        return UnoConsts.Cards.GreenDrawTwo;
+      }
+      if (this.hasCard(UnoConsts.Cards.BlueDrawTwo)) {
+        return UnoConsts.Cards.BlueDrawTwo;
+      }
+      if (this.hasCard(UnoConsts.Cards.RedSkip)) {
+        return UnoConsts.Cards.RedSkip;
+      }
+      if (this.hasCard(UnoConsts.Cards.YellowSkip)) {
+        return UnoConsts.Cards.YellowSkip;
+      }
+      if (this.hasCard(UnoConsts.Cards.GreenSkip)) {
+        return UnoConsts.Cards.GreenSkip;
+      }
+      if (this.hasCard(UnoConsts.Cards.BlueSkip)) {
+        return UnoConsts.Cards.BlueSkip;
+      }
+    }
+
+    /* 前のプレイヤの手札が少なくないなら、リバースを出す。 */
+    const prevPlayerID = msg.turn_right ?
+        this.playOrder[(this.myIdxOnOrder - 1 + 4) % 4] :
+        this.playOrder[(this.myIdxOnOrder + 1) % 4];
+    if (msg.number_card_of_player[prevPlayerID] > Drachen.FEW_HAND_THRESHOLD) {
+      if (this.hasCard(UnoConsts.Cards.RedReverse)) {
+        return UnoConsts.Cards.RedReverse;
+      }
+      if (this.hasCard(UnoConsts.Cards.YellowReverse)) {
+        return UnoConsts.Cards.YellowReverse;
+      }
+      if (this.hasCard(UnoConsts.Cards.GreenReverse)) {
+        return UnoConsts.Cards.GreenReverse;
+      }
+      if (this.hasCard(UnoConsts.Cards.BlueReverse)) {
+        return UnoConsts.Cards.BlueReverse;
+      }
+    }
+
+    /* 出せる妨害手がなかった。 */
+    return null;
+  }
+
+  /* 自分の勝つ見込みが少ない？ */
+  private isLikelyToWin(msg: UnoConsts.Event.Message.Receive.NextPlayer): boolean {
+    
   }
 }
