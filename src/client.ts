@@ -1,4 +1,4 @@
-import * as assert from "assert";
+import assert from "assert";
 import { UnoConsts } from "./consts";
 import { UnoPlayerInterface } from "./player_interface";
 
