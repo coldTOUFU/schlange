@@ -243,6 +243,65 @@ export namespace UnoConsts {
   };
 
   export namespace Cards {
+    export const RedSkip: Card = {
+      color: Color.Red,
+      special: Action.Skip
+    };
+
+    export const YellowSkip: Card = {
+      color: Color.Yellow,
+      special: Action.Skip
+    };
+
+    export const GreenSkip: Card = {
+      color: Color.Green,
+      special: Action.Skip
+    };
+
+    export const BlueSkip: Card = {
+      color: Color.Blue,
+      special: Action.Skip
+    };
+
+    export const RedReverse: Card = {
+      color: Color.Red,
+      special: Action.Reverse
+    };
+
+    export const YellowReverse: Card = {
+      color: Color.Yellow,
+      special: Action.Reverse
+    };
+
+    export const GreenReverse: Card = {
+      color: Color.Green,
+      special: Action.Reverse
+    };
+
+    export const BlueReverse: Card = {
+      color: Color.Blue,
+      special: Action.Reverse
+    };
+    export const RedDrawTwo: Card = {
+      color: Color.Red,
+      special: Action.DrawTwo
+    };
+
+    export const YellowDrawTwo: Card = {
+      color: Color.Yellow,
+      special: Action.DrawTwo
+    };
+
+    export const GreenDrawTwo: Card = {
+      color: Color.Green,
+      special: Action.DrawTwo
+    };
+
+    export const BlueDrawTwo: Card = {
+      color: Color.Blue,
+      special: Action.DrawTwo
+    };
+
     export const WildDraw4: Card = {
       color: Color.Black,
       special: Action.WildDraw4
@@ -251,6 +310,11 @@ export namespace UnoConsts {
     export const WildShuffleHands: Card = {
       color: Color.Black,
       special: Action.WildShuffleHands
+    };
+
+    export const WildCustomizable: Card = {
+      color: Color.White,
+      special: Action.WildCustomizable
     };
   }
 
