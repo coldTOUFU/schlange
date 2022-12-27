@@ -85,7 +85,7 @@ export class Schlange implements UnoPlayerInterface.PlayerInterface {
     /* 手札中の一番多い色を選ぶ。 */
     let numOfBlue = 0, numOfGreen = 0, numOfRed = 0, numOfYellow = 0;
 
-    this.legalSubmissions.forEach((card) => {
+    this.myCards.forEach((card) => {
       switch (card.color) {
         case UnoConsts.Color.Blue:
           numOfBlue++;
