@@ -282,6 +282,7 @@ export namespace UnoConsts {
       color: Color.Blue,
       special: Action.Reverse
     };
+
     export const RedDrawTwo: Card = {
       color: Color.Red,
       special: Action.DrawTwo
@@ -300,6 +301,11 @@ export namespace UnoConsts {
     export const BlueDrawTwo: Card = {
       color: Color.Blue,
       special: Action.DrawTwo
+    };
+
+    export const Wild: Card = {
+      color: Color.Black,
+      special: Action.Wild
     };
 
     export const WildDraw4: Card = {

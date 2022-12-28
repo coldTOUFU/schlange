@@ -85,7 +85,7 @@ export class Drachen implements UnoPlayerInterface.PlayerInterface {
       return;
     }
 
-    this.decideBestHand(msg);    
+    this.bestSubmission(msg);    
   }
 
   public onReceivedPublicCard(msg: UnoConsts.Event.Message.Receive.PublicCard): void {;}
@@ -195,64 +195,148 @@ export class Drachen implements UnoPlayerInterface.PlayerInterface {
     return UnoUtils.countCardIn(card, this.myCards) > 0;
   }
 
+  /* 手札中の一番多い色とその数を返す。 */
+  private countMostCommonColor(): { color: UnoConsts.Color, quantity: number } {
+    let numOfColors = {
+      [UnoConsts.Color.Red]:    0,
+      [UnoConsts.Color.Yellow]: 0,
+      [UnoConsts.Color.Green]:  0,
+      [UnoConsts.Color.Blue]:   0
+    };
+    this.myCards.forEach((card) => {
+      if (card.color !== UnoConsts.Color.Black && card.color !== UnoConsts.Color.White) {
+        numOfColors[card.color]++;
+      }
+    });
+    let mostCommonColor = UnoConsts.Color.Red;
+    let maxColorQuantity = 0;
+    for (const color in numOfColors) {
+      assert(color === UnoConsts.Color.Red ||
+             color === UnoConsts.Color.Yellow ||
+             color === UnoConsts.Color.Green ||
+             color === UnoConsts.Color.Blue);
+      if (numOfColors[color] > maxColorQuantity) {
+        mostCommonColor = color;
+        maxColorQuantity = numOfColors[color];
+      }
+    }
+    return {
+      color: mostCommonColor,
+      quantity: maxColorQuantity
+    };
+  }
+
+  /* 手札中の一番多い数字とその数を返す。 */
+  private countMostCommonNumber(): { number: UnoConsts.Number, quantity: number } {
+    let numOfNumbers = {
+      [UnoConsts.Number.Zero]:  0,
+      [UnoConsts.Number.One]:   0,
+      [UnoConsts.Number.Two]:   0,
+      [UnoConsts.Number.Three]: 0,
+      [UnoConsts.Number.Four]:  0,
+      [UnoConsts.Number.Five]:  0,
+      [UnoConsts.Number.Six]:   0,
+      [UnoConsts.Number.Seven]: 0,
+      [UnoConsts.Number.Eight]: 0,
+      [UnoConsts.Number.Nine]:  0
+    };
+    this.myCards.forEach((card) => {
+      if (card.number !== undefined) {
+        numOfNumbers[card.number]++;
+      }
+    });
+    let mostCommonNumber = UnoConsts.Number.Zero;
+    let maxNumberQuantity = 0;
+    for (const key in numOfNumbers) {
+      const num = Number(key);
+      assert(num === 0 || num === 1 || num === 2 ||
+             num === 3 || num === 4 || num === 5 ||
+             num === 6 || num === 7 || num === 8 || num === 9);
+      if (numOfNumbers[num] > maxNumberQuantity) {
+        mostCommonNumber = num;
+        maxNumberQuantity = numOfNumbers[num];
+      }
+    }
+    return {
+      number: mostCommonNumber,
+      quantity: maxNumberQuantity
+    };
+  }
+
+  /* 手札中の一番多い記号とその数を返す。 */
+  private countMostCommonAction(): { action: UnoConsts.Action, quantity: number } {
+    let numOfActions = {
+      [UnoConsts.Action.Skip]:             0,
+      [UnoConsts.Action.Reverse]:          0,
+      [UnoConsts.Action.DrawTwo]:          0,
+      [UnoConsts.Action.Wild]:             0,
+      [UnoConsts.Action.WildDraw4]:        0,
+      [UnoConsts.Action.WildShuffleHands]: 0,
+      [UnoConsts.Action.WildCustomizable]: 0
+    };
+    this.myCards.forEach((card) => {
+      if (card.special !== undefined) {
+        numOfActions[card.special]++;
+      }
+    });
+    let mostCommonAction = UnoConsts.Action.DrawTwo;
+    let maxActionQuantity = 0;
+    for (const action in numOfActions) {
+      assert(action === UnoConsts.Action.DrawTwo ||
+             action === UnoConsts.Action.Reverse ||
+             action === UnoConsts.Action.Skip ||
+             action === UnoConsts.Action.Wild ||
+             action === UnoConsts.Action.WildCustomizable ||
+             action === UnoConsts.Action.WildDraw4 ||
+             action === UnoConsts.Action.WildShuffleHands);
+      if (numOfActions[action] > maxActionQuantity) {
+        mostCommonAction = action;
+        maxActionQuantity = numOfActions[action];
+      }
+    }
+    return {
+      action: mostCommonAction,
+      quantity: maxActionQuantity
+    };
+  }
+
   static readonly evalMin = 0;
   static readonly evalMax = 1000;
-  static readonly evalWildDraw4 = 1;
-  static readonly evalWild = 2;
-  static readonly evalOtherWild = 3;
-  static readonly evalNumber = 4;
-  static readonly evalAction = 4 * 10 + 1;
 
   static readonly FEW_HAND_THRESHOLD = 2; // 2枚以下なら手札が少ないとする。
-  static readonly MANY_HAND_THRESHOLD = 5; // 5枚以上なら手札が多いとする。
+  static readonly MANY_HAND_THRESHOLD = 7; // 7枚以上なら手札が多いとする。
 
-  private decideBestHand(msg: UnoConsts.Event.Message.Receive.NextPlayer) {
-    const canUseWildDraw4 = this.isWildDraw4Valid();
+  private bestSubmission(msg: UnoConsts.Event.Message.Receive.NextPlayer) {
+    /* ワイルドドロー4があるので先に出さなければならないか、自分の手札が多い場合、シャッフルワイルドを出す。 */
+    // TODO: ワイルドドロー4がある場合、さっさとシャッフルワイルドを出す方が良いのか、待ってからがいいのか問題。
+    if ((this.hasCard(UnoConsts.Cards.WildDraw4) ||
+        this.myCards.length >= Drachen.MANY_HAND_THRESHOLD) &&
+        this.hasCard(UnoConsts.Cards.WildDraw4)) {
+      return UnoConsts.Cards.WildShuffleHands;
+    }
 
-    let bestIdx = -1;
-    let bestScore = Drachen.evalMin;
+    /* 次プレイヤを妨害できる手があれば出す。 */
+    const interferingCard = this.searchInterferingCard(msg);
+    if (interferingCard) {
+      return interferingCard;
+    }
 
-    /* 手札が少ない相手プレイヤがいる？ */
-    let winningOpponentExists = false;
-    for (const playerId in msg.number_card_of_player) {
-      if (playerId !== this.myPlayerId &&
-          msg.number_card_of_player[playerId] <= Drachen.FEW_HAND_THRESHOLD) {
-        winningOpponentExists = true;
-        break;
+    /* 自分の勝つ見込みが少ないなら、減点の大きい手から出す。 */
+    if (this.isLikelyToLoseRound(msg)) {
+      return this.bestSubmissionOnLosing();
+    }
+
+    /* 色が偏っていたら、ワイルドを出して調整を図る。 */
+    /* 手札5枚以上で、半分以上が同じ色なら偏っているとする。 */
+    if (this.myCards.length >= 5 && this.hasCard(UnoConsts.Cards.Wild)) {
+      const countMostCommonColor = this.countMostCommonColor();
+      if (countMostCommonColor.quantity > this.myCards.length * 2) {
+        return UnoConsts.Cards.Wild;
       }
     }
 
-    /* 各着手の評価値を計算して、最良の着手を取る。 */
-    for (let i = 0; i < this.legalSubmissions.length; i++) {
-      const card = this.legalSubmissions[i];
-
-      /* ワイルドドロー4の反則はしない。 */
-      if (UnoUtils.isSameCard(card, UnoConsts.Cards.WildDraw4) && !canUseWildDraw4) {
-        continue;
-      }
-
-      /* 手札が少ないプレイヤがいる場合。 */      
-      if (winningOpponentExists) {
-        if ((UnoUtils.countCardIn(UnoConsts.Cards.WildDraw4, this.myCards) > 0 ||
-            this.myCards.length >= Drachen.MANY_HAND_THRESHOLD) &&
-            UnoUtils.isSameCard(card, UnoConsts.Cards.WildShuffleHands)) {
-          bestIdx = i;
-          break;
-        }
-      } else {
-        const interferingCard = this.searchInterferingCard(msg);
-        if (interferingCard) {
-          return interferingCard;
-        }
-
-        if (this.isLikelyToWin(msg)) {
-          // TODO: 減点の大きい手から出す。
-        }
-      }
-
-    }
-
-    return this.legalSubmissions[bestIdx];
+    /* 特別な場合以外。 */
+    return this.bestSubmissionOnNormal();
   }
 
   /* 次プレイヤを妨害する手を選ぶ。 */
@@ -326,7 +410,81 @@ export class Drachen implements UnoPlayerInterface.PlayerInterface {
   }
 
   /* 自分の勝つ見込みが少ない？ */
-  private isLikelyToWin(msg: UnoConsts.Event.Message.Receive.NextPlayer): boolean {
-    
+  private isLikelyToLoseRound(msg: UnoConsts.Event.Message.Receive.NextPlayer): boolean {
+    /* 自分の手札が多く、手札が少ないプレイヤが2人以上いたら勝てなさそうだと判断する。 */
+    return this.myCards.length >= Drachen.MANY_HAND_THRESHOLD &&
+        (Object.values(msg.number_card_of_player)
+        .filter(n => n <= Drachen.FEW_HAND_THRESHOLD).length >= 2);
+  }
+
+  /* 勝てなさそうなときの最善手。 */
+  private bestSubmissionOnLosing(): UnoConsts.Card {
+    let bestIdx = 0;
+    let bestScore = Drachen.evalMin;
+    const isWildDraw4Valid = this.isWildDraw4Valid();
+
+    /* 減点の大きい手を出す。 */
+    for (let i = 0; i < this.legalSubmissions.length; i++) {
+      const card = this.legalSubmissions[i];
+      /* ワイルドドロー4の反則はしない。 */
+      if (!isWildDraw4Valid && UnoUtils.isSameCard(card, UnoConsts.Cards.WildDraw4)) {
+        continue;
+      }
+      const score = UnoUtils.cardScore(card);
+      if (score > bestScore) {
+        bestIdx = i;
+        bestScore = score;
+      }
+    }
+    return this.legalSubmissions[bestIdx];
+  }
+
+  /* 通常の場合の最善手。 */
+  private bestSubmissionOnNormal(): UnoConsts.Card {
+    const evalWeightNumber = 2; // 数字カードの評価値は[2, 20]の範囲。
+    const evalWeightAction = 21;
+    const evalWeightWild = 1;
+
+    /* 提出候補。これを次々絞っていく。 */
+    let candidates = this.legalSubmissions;
+
+    /* 手札で一番の多い色のカードに絞る。 */
+    const mostCommonColor = this.countMostCommonColor().color;
+    candidates = candidates.filter(card => card.color === mostCommonColor);
+    if (candidates.length === 1) { return candidates[0]; }
+
+    /* 手札で一番多い模様のカードに絞る。 */
+    const mostCommonNumberAndQuantity = this.countMostCommonNumber();
+    const mostCommonActionAndQuantity = this.countMostCommonAction();
+    if (mostCommonNumberAndQuantity.quantity > mostCommonActionAndQuantity.quantity) {
+      candidates = candidates.filter(card =>
+          (card.number !== undefined) &&
+          (card.number === mostCommonNumberAndQuantity.number));
+    } else {
+      candidates = candidates.filter(card =>
+          (card.special !== undefined) &&
+          (card.special === mostCommonActionAndQuantity.action));
+    }
+    if (candidates.length === 1) { return candidates[0]; }
+
+    let bestIdx = 0;
+    let bestEvalue = Drachen.evalMin;
+    for (let i = 0; i < candidates.length; i++) {
+      let evalue: number;
+      const card = candidates[i];
+      if (card.number !== undefined) {
+        evalue = (card.number + 1) * evalWeightNumber;
+      } else if (card.color !== UnoConsts.Color.Black && card.color !== UnoConsts.Color.White) {
+        evalue = evalWeightAction;
+      } else {
+        evalue = evalWeightWild;
+      }
+      if (evalue > bestEvalue) {
+        bestIdx = i;
+        bestEvalue = evalue;
+      }
+    }
+
+    return candidates[bestIdx];
   }
 }
