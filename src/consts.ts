@@ -236,6 +236,8 @@ export namespace UnoConsts {
     Bind2 = "bind_2"
   }
 
+  export const numOfAllCards = 112;
+
   export type Card = {
     number?:  Number,
     color:    Color,
