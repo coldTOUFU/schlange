@@ -1,7 +1,5 @@
-import { Schlange } from "./schlange"
 import { Drachen } from "./drachen"
 import { UnoClient } from "./client";
-import { UnoPlayerInterface } from "./player_interface";
 
 const process = require("process");
 const isConnectionTestMode = (process.argv.length === 3 && process.argv[2] === "test");

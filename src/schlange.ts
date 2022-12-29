@@ -1,4 +1,5 @@
 import assert from "assert";
+import { SpecialLogic } from "./special_logic";
 import { UnoConsts } from "./consts";
 import { UnoPlayerInterface } from "./player_interface";
 import { UnoUtils } from "./utils";
@@ -179,6 +180,10 @@ export class Schlange implements UnoPlayerInterface.PlayerInterface {
     });
 
     return this.legalSubmissions[bestIdx];
+  }
+
+  public specialLogic(): SpecialLogic {
+    return SpecialLogic.Empty;
   }
 
   private myCards: UnoConsts.Card[] = [];

@@ -1,4 +1,5 @@
 import assert from 'assert'
+import { SpecialLogic } from "./special_logic";
 import { UnoConsts } from "./consts";
 import { UnoPlayerInterface } from "./player_interface";
 import { UnoUtils } from "./utils";
@@ -71,6 +72,10 @@ export class Drachen implements UnoPlayerInterface.PlayerInterface {
   /* カードを引かなければならない場合はなにもしなくてよい。それ以外の場合、場のカードから合法手を作る。 */
   /* その後、出すべきカードを決める。 */
   public onReceivedNextPlayer(msg: UnoConsts.Event.Message.Receive.NextPlayer): void {
+    /* スペシャルロジックは、提出時のみ使い、クライアント側も提出時のみ
+       スペシャルロジックを出したいか確認してくる。そのため、ここで初期化しておけば十分。 */
+    this.currentSpecialLogic = SpecialLogic.Empty;
+
     if (msg.must_call_draw_card) { return; }
 
     this.setLegalSubmissions(msg.card_before);
@@ -140,6 +145,10 @@ export class Drachen implements UnoPlayerInterface.PlayerInterface {
     return this.myCards.length == 2;
   }
 
+  public specialLogic(): SpecialLogic {
+    return this.currentSpecialLogic;
+  }
+
   public submitCard(): UnoConsts.Card {
     assert(this.bestHand !== null);
 
@@ -156,6 +165,7 @@ export class Drachen implements UnoPlayerInterface.PlayerInterface {
   private legalSubmissions: UnoConsts.Card[] = [];
   private canSubmitDrawnCard: boolean = false;
   private bestHand: UnoConsts.Card | null = null;
+  private currentSpecialLogic: SpecialLogic = SpecialLogic.Empty;
 
   private removeCard(card: UnoConsts.Card) {
     for (let i = 0; i < this.myCards.length; i++) {
@@ -269,18 +279,21 @@ export class Drachen implements UnoPlayerInterface.PlayerInterface {
     }
 
     /* 次プレイヤを妨害できる手があれば出す。 */
+    this.currentSpecialLogic = SpecialLogic.Interfering;
     const interferingCard = this.searchInterferingCard(msg);
     if (interferingCard) {
       return interferingCard;
     }
 
     /* 自分の勝つ見込みが少ないなら、減点の大きい手から出す。 */
+    this.currentSpecialLogic = SpecialLogic.Losing;
     if (this.isLikelyToLoseRound(msg)) {
       return this.bestSubmissionOnLosing();
     }
 
     /* 色が偏っていたら、ワイルドを出して調整を図る。 */
     /* 手札5枚以上で、半分以上が同じ色なら偏っているとする。 */
+    this.currentSpecialLogic = SpecialLogic.Balancing;
     if (this.myCards.length >= 5 && this.hasCard(UnoConsts.Cards.Wild)) {
       const countColors = this.countColors();
       if (Object.values(countColors).find(quantity => quantity > this.myCards.length * 2)) {
