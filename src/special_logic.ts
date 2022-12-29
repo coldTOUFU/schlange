@@ -1,6 +1,6 @@
 export enum SpecialLogic {
   Empty =       "",
-  Losing =      "一矢",
-  Interfering = "損切",
+  Losing =      "損切",
+  Interfering = "妨害",
   Balancing =   "均衡"
 }

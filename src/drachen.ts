@@ -279,24 +279,24 @@ export class Drachen implements UnoPlayerInterface.PlayerInterface {
     }
 
     /* 次プレイヤを妨害できる手があれば出す。 */
-    this.currentSpecialLogic = SpecialLogic.Interfering;
     const interferingCard = this.searchInterferingCard(msg);
     if (interferingCard) {
+      this.currentSpecialLogic = SpecialLogic.Interfering;
       return interferingCard;
     }
 
     /* 自分の勝つ見込みが少ないなら、減点の大きい手から出す。 */
-    this.currentSpecialLogic = SpecialLogic.Losing;
     if (this.isLikelyToLoseRound(msg)) {
+      this.currentSpecialLogic = SpecialLogic.Losing;
       return this.bestSubmissionOnLosing();
     }
 
     /* 色が偏っていたら、ワイルドを出して調整を図る。 */
     /* 手札5枚以上で、半分以上が同じ色なら偏っているとする。 */
-    this.currentSpecialLogic = SpecialLogic.Balancing;
     if (this.myCards.length >= 5 && this.hasCard(UnoConsts.Cards.Wild)) {
       const countColors = this.countColors();
       if (Object.values(countColors).find(quantity => quantity > this.myCards.length * 2)) {
+        this.currentSpecialLogic = SpecialLogic.Balancing;
         return UnoConsts.Cards.Wild;
       }
     }
@@ -319,35 +319,35 @@ export class Drachen implements UnoPlayerInterface.PlayerInterface {
         this.playOrder[(this.myIdxOnOrder + 2) % 4] :
         this.playOrder[(this.myIdxOnOrder - 2 + 4) % 4];
     if (msg.number_card_of_player[nextOfNextPlayerID] > Drachen.FEW_HAND_THRESHOLD) {
-      if (this.hasCard(UnoConsts.Cards.WildDraw4) &&
+      if (UnoUtils.countCardIn(UnoConsts.Cards.WildDraw4, this.legalSubmissions) > 0 &&
           this.isWildDraw4Valid()) {
         return UnoConsts.Cards.WildDraw4;
       }
-      if (this.hasCard(UnoConsts.Cards.WildCustomizable)) {
+      if (UnoUtils.countCardIn(UnoConsts.Cards.WildCustomizable, this.legalSubmissions) > 0) {
         return UnoConsts.Cards.WildCustomizable;
       }
-      if (this.hasCard(UnoConsts.Cards.RedDrawTwo)) {
+      if (UnoUtils.countCardIn(UnoConsts.Cards.RedDrawTwo, this.legalSubmissions) > 0) {
         return UnoConsts.Cards.RedDrawTwo;
       }
-      if (this.hasCard(UnoConsts.Cards.YellowDrawTwo)) {
+      if (UnoUtils.countCardIn(UnoConsts.Cards.YellowDrawTwo, this.legalSubmissions) > 0) {
         return UnoConsts.Cards.YellowDrawTwo;
       }
-      if (this.hasCard(UnoConsts.Cards.GreenDrawTwo)) {
+      if (UnoUtils.countCardIn(UnoConsts.Cards.GreenDrawTwo, this.legalSubmissions) > 0) {
         return UnoConsts.Cards.GreenDrawTwo;
       }
-      if (this.hasCard(UnoConsts.Cards.BlueDrawTwo)) {
+      if (UnoUtils.countCardIn(UnoConsts.Cards.BlueDrawTwo, this.legalSubmissions) > 0) {
         return UnoConsts.Cards.BlueDrawTwo;
       }
-      if (this.hasCard(UnoConsts.Cards.RedSkip)) {
+      if (UnoUtils.countCardIn(UnoConsts.Cards.RedSkip, this.legalSubmissions) > 0) {
         return UnoConsts.Cards.RedSkip;
       }
-      if (this.hasCard(UnoConsts.Cards.YellowSkip)) {
+      if (UnoUtils.countCardIn(UnoConsts.Cards.YellowSkip, this.legalSubmissions) > 0) {
         return UnoConsts.Cards.YellowSkip;
       }
-      if (this.hasCard(UnoConsts.Cards.GreenSkip)) {
+      if (UnoUtils.countCardIn(UnoConsts.Cards.GreenSkip, this.legalSubmissions) > 0) {
         return UnoConsts.Cards.GreenSkip;
       }
-      if (this.hasCard(UnoConsts.Cards.BlueSkip)) {
+      if (UnoUtils.countCardIn(UnoConsts.Cards.BlueSkip, this.legalSubmissions) > 0) {
         return UnoConsts.Cards.BlueSkip;
       }
     }
@@ -357,16 +357,16 @@ export class Drachen implements UnoPlayerInterface.PlayerInterface {
         this.playOrder[(this.myIdxOnOrder - 1 + 4) % 4] :
         this.playOrder[(this.myIdxOnOrder + 1) % 4];
     if (msg.number_card_of_player[prevPlayerID] > Drachen.FEW_HAND_THRESHOLD) {
-      if (this.hasCard(UnoConsts.Cards.RedReverse)) {
+      if (UnoUtils.countCardIn(UnoConsts.Cards.RedReverse, this.legalSubmissions) > 0) {
         return UnoConsts.Cards.RedReverse;
       }
-      if (this.hasCard(UnoConsts.Cards.YellowReverse)) {
+      if (UnoUtils.countCardIn(UnoConsts.Cards.YellowReverse, this.legalSubmissions) > 0) {
         return UnoConsts.Cards.YellowReverse;
       }
-      if (this.hasCard(UnoConsts.Cards.GreenReverse)) {
+      if (UnoUtils.countCardIn(UnoConsts.Cards.GreenReverse, this.legalSubmissions) > 0) {
         return UnoConsts.Cards.GreenReverse;
       }
-      if (this.hasCard(UnoConsts.Cards.BlueReverse)) {
+      if (UnoUtils.countCardIn(UnoConsts.Cards.BlueReverse, this.legalSubmissions) > 0) {
         return UnoConsts.Cards.BlueReverse;
       }
     }
