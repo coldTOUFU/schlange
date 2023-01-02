@@ -1,4 +1,5 @@
 import assert from "assert";
+import { SpecialLogic } from "./special_logic";
 import { UnoConsts } from "./consts";
 import { UnoPlayerInterface } from "./player_interface";
 import { UnoUtils } from "./utils";
@@ -151,7 +152,7 @@ export class Schlange implements UnoPlayerInterface.PlayerInterface {
     /* 各着手の評価値を計算して、最良の着手を取る。 */
     this.legalSubmissions.forEach((card, idx) => {
       let score: number;
-      if (card.number) {
+      if (card.number !== undefined) {
         /* 数字カード。 */
         score = (card.number + 1) * Schlange.evalNumber;
       } else if (card.color !== UnoConsts.Color.Black && card.color !== UnoConsts.Color.White) {
@@ -179,6 +180,10 @@ export class Schlange implements UnoPlayerInterface.PlayerInterface {
     });
 
     return this.legalSubmissions[bestIdx];
+  }
+
+  public specialLogic(): SpecialLogic {
+    return SpecialLogic.Empty;
   }
 
   private myCards: UnoConsts.Card[] = [];

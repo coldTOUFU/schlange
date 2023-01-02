@@ -21,12 +21,26 @@ export namespace UnoUtils {
   export function isLegal(card: UnoConsts.Card, tableCard: UnoConsts.Card) {
     if (card.color === UnoConsts.Color.Black || card.color === UnoConsts.Color.White) { return true; }
     if (card.color === tableCard.color) { return true; }
-    if (card.number && tableCard.number && (card.number === tableCard.number)) { return true; }
+    if ((card.number !== undefined) && (tableCard.number !== undefined) && (card.number === tableCard.number)) { return true; }
     if (card.special && tableCard.special && (card.special === tableCard.special)) { return true; }
     return false;
   }
 
   export function countCardIn(card: UnoConsts.Card, cards: UnoConsts.Card[]) {
     return cards.filter(c => UnoUtils.isSameCard(c, card)).length
+  }
+
+  export function cardScore(card: UnoConsts.Card): number {
+    if (card.number !== undefined) {
+      /* UnoConsts.Card.number の実体が対応する数値であることを前提している。 */
+      return card.number;
+    }
+    if (card.color !== UnoConsts.Color.Black && card.color !== UnoConsts.Color.White) {
+      return 20;
+    }
+    if (card.special === UnoConsts.Action.WildShuffleHands || card.special === UnoConsts.Action.WildCustomizable) {
+      return 40;
+    }
+    return 50;
   }
 }

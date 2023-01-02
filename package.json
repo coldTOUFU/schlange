@@ -1,6 +1,6 @@
 {
-  "name": "Schlange",
-  "version": "1.0.0",
+  "name": "schlange",
+  "version": "2.0.0",
   "description": "A heuristic UNO player.",
   "main": "out/index.js",
   "dependencies": {

@@ -1,4 +1,4 @@
-import { Schlange } from "./schlange"
+import { Drachen } from "./drachen"
 import { UnoClient } from "./client";
 
 const process = require("process");
@@ -19,7 +19,7 @@ if (isConnectionTestMode) {
   process.exit(1);
 }
 
-const player = new Schlange();
+const player = new Drachen();
 const client = new UnoClient.Client(process.env.HOST,
                                     process.env.DEALER,
                                     process.env.PLAYER,

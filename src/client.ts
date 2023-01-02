@@ -1,4 +1,5 @@
 import assert from "assert";
+import { SpecialLogic } from "./special_logic";
 import { UnoConsts } from "./consts";
 import { UnoPlayerInterface } from "./player_interface";
 
@@ -228,6 +229,10 @@ export namespace UnoClient {
           if (willChallenge) { return; }
         }
 
+        if (this.player.specialLogic() !== SpecialLogic.Empty) {
+          this.sendSpecialLogic();
+        }
+
         if (msg.must_call_draw_card || this.player.willDraw()) {
           /* カードを引かなければならない場合か、引きたい場合 → カードを引く。 */
           this.sendDrawCard();
@@ -352,6 +357,18 @@ export namespace UnoClient {
         console.log(msg);
       }
       this.client.emit(UnoConsts.Event.Name.Send.PlayCard,
+                       msg);
+    }
+
+    private sendSpecialLogic() {
+      const msg: UnoConsts.Event.Message.Send.SpecialLogic = {
+        title: this.player.specialLogic()
+      };
+      if (isDebugMode) {
+        console.log("[Send] say-uno-and-play-draw-card");
+        console.log(msg);
+      }
+      this.client.emit(UnoConsts.Event.Name.Send.SpecialLogic,
                        msg);
     }
   }
