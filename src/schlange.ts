@@ -1,5 +1,4 @@
-import * as assert from "assert";
-import { getEffectiveTypeParameterDeclarations } from "typescript";
+import assert from "assert";
 import { UnoConsts } from "./consts";
 import { UnoPlayerInterface } from "./player_interface";
 import { UnoUtils } from "./utils";
@@ -85,7 +84,7 @@ export class Schlange implements UnoPlayerInterface.PlayerInterface {
     /* 手札中の一番多い色を選ぶ。 */
     let numOfBlue = 0, numOfGreen = 0, numOfRed = 0, numOfYellow = 0;
 
-    this.legalSubmissions.forEach((card) => {
+    this.myCards.forEach((card) => {
       switch (card.color) {
         case UnoConsts.Color.Blue:
           numOfBlue++;
