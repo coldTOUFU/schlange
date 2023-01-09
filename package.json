@@ -1,7 +1,7 @@
 {
-  "name": "Schlange",
+  "name": "schlange",
   "version": "1.0.0",
-  "description": "A heuristic UNO player.",
+  "description": "A rulebase UNO player.",
   "main": "out/index.js",
   "dependencies": {
     "assert": "^2.0.0",
