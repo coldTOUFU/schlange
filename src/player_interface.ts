@@ -1,4 +1,3 @@
-import { SpecialLogic } from "./special_logic";
 import { UnoConsts } from "./consts";
 
 export namespace UnoPlayerInterface {
@@ -36,9 +35,6 @@ export namespace UnoPlayerInterface {
 
     /* UNO宣言する？ */
     shouldYellUNO(): boolean;
-
-    /* 今は発動したいスペシャルロジックを返す。 */
-    specialLogic(): SpecialLogic;
 
     /* 提出するカードを決めて返す。 */
     submitCard(): UnoConsts.Card;
