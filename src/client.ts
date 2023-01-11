@@ -203,6 +203,15 @@ export namespace UnoClient {
         this.sendColorOfWild();
       });
 
+      this.client.on(UnoConsts.Event.Name.Receive.UpdateColor,
+                    (msg: UnoConsts.Event.Message.Receive.UpdateColor) => {
+        if (isDebugMode) {
+          console.log("[Receive] update-color");
+          console.log(msg);
+        }
+        this.player.onReceivedUpdateColor(msg);
+      });
+
       this.client.on(UnoConsts.Event.Name.Receive.ShuffleWild,
                     (msg: UnoConsts.Event.Message.Receive.ShuffleWild) => {
         if (isDebugMode) {
@@ -265,6 +274,15 @@ export namespace UnoClient {
             console.log(msg);
           }
         this.player.onReceivedFinishGame(msg);
+      });
+
+      this.client.on(UnoConsts.Event.Name.Receive.Penalty,
+                    (msg: UnoConsts.Event.Message.Receive.Penalty) => {
+          if (isDebugMode) {
+            console.log("[Receive] penalty");
+            console.log(msg);
+          }
+        this.player.onReceivedPenalty(msg);
       });
     }
 
