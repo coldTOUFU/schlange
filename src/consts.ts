@@ -32,11 +32,13 @@ export namespace UnoConsts {
         ReceiverCard =          "receiver-card",
         FirstPlayer =           "first-player",
         ColorOfWild =           "color-of-wild",
+        UpdateColor =           "update-color",
         ShuffleWild =           "shuffle-wild",
         NextPlayer =            "next-player",
         PublicCard =            "public-card",
         FinishTurn =            "finish-turn",
-        FinishGame =            "finish-game"
+        FinishGame =            "finish-game",
+        Penalty =               "penalty"
       }
     }
 
@@ -154,8 +156,15 @@ export namespace UnoConsts {
 
         export type ColorOfWild = {};
 
+        export type UpdateColor = {
+          color: Color
+        };
+
         export type ShuffleWild = {
-          cards_receive: Card[]
+          cards_receive: Card[],
+          number_card_of_player: {
+            [player_id: string]: number
+          }
         };
 
         export type NextPlayer = {
@@ -196,6 +205,12 @@ export namespace UnoConsts {
             [player_name: string]: number
           }
         };
+
+        export type Penalty = {
+          player: string,
+          number_card_of_player: number,
+          error: string
+        }
       }
     }
   }
