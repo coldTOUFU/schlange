@@ -32,8 +32,8 @@
 
 1. ビルドする。
 
-```
-docker bulid schlange .
+```bash
+$ docker bulid -t uno-player .
 ```
 
 2. 実行する。
@@ -41,6 +41,11 @@ docker bulid schlange .
 `"http://localhost:8080/", "Dealer 1", "Player 1"`
 の部分は、それぞれ接続先アドレス、ディーラ名、プレイヤ名をご自身の環境等に合わせて書き換えてください。
 
-```
-docker run -p 8080:8080 schlange "http://localhost:8080/", "Dealer 1", "Player 1"
+
+```bash
+# Windows/Mac環境での実行
+$ docker run uno-player "http://host.docker.internal:8080" "Dealer 1" "Player 1"
+
+# Linux環境での実行
+$ docker run --add-host=host.docker.internal:host-gateway uno-player "http://host.docker.internal:8080" "Dealer 1" "Player 1"
 ```
