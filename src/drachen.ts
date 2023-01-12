@@ -64,6 +64,8 @@ export class Drachen implements UnoPlayerInterface.PlayerInterface {
 
   public onReceivedColorOfWild(msg: UnoConsts.Event.Message.Receive.ColorOfWild): void {;}
 
+  public onReceivedUpdateColor(msg: UnoConsts.Event.Message.Receive.UpdateColor): void {;}
+
   /* シャッフルワイルド発動後、配りなおされたカードを自分の手札にする。 */
   public onReceivedShuffleWild(msg: UnoConsts.Event.Message.Receive.ShuffleWild): void {
     this.myCards = msg.cards_receive;
@@ -101,6 +103,8 @@ export class Drachen implements UnoPlayerInterface.PlayerInterface {
   }
 
   public onReceivedFinishGame(msg: UnoConsts.Event.Message.Receive.FinishGame): void {;}
+
+  public onReceivedPenalty(msg: UnoConsts.Event.Message.Receive.Penalty): void {;}
 
   public changeColor(): UnoConsts.Color {
     /* 手札中の一番多い色を選ぶ。 */
